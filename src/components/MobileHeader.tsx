@@ -20,7 +20,7 @@ export default function MobileHeader() {
             <div className="inline-flex items-center justify-center h-6 w-6 rounded-full text-white text-xs font-medium" style={{ backgroundColor: 'rgb(231, 86, 80)' }}>
               {user?.fullName?.charAt(0).toUpperCase()}
             </div>
-            <span className="text-xs font-medium text-gray-900 max-w-[80px] truncate">{user?.fullName}</span>
+            <span className="text-xs font-medium text-gray-900 max-w-20 truncate">{user?.fullName}</span>
           </div>
           <button
             onClick={logout}
