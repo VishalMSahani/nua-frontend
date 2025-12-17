@@ -71,8 +71,9 @@ export default function Home() {
     setFilesLoading(true);
     try {
       const token = localStorage.getItem('token');
-      
-      const response = await axios.get('http://localhost:3001/api/files', {
+
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const response = await axios.get(`${API_URL}/files`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -125,7 +126,8 @@ export default function Home() {
         const formData = new FormData();
         formData.append('file', file);
 
-        await axios.post('http://localhost:3001/api/files/upload', formData, {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+        await axios.post(`${API_URL}/files/upload`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
@@ -147,8 +149,9 @@ export default function Home() {
   const handleView = async (file: FileItem) => {
     try {
       const token = localStorage.getItem('token');
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
       const response = await axios.get(
-        `http://localhost:3001/api/files/${file.id}/download`,
+        `${API_URL}/files/${file.id}/download`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob',
@@ -173,8 +176,9 @@ export default function Home() {
   const handleDownload = async (file: FileItem) => {
     try {
       const token = localStorage.getItem('token');
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
       const response = await axios.get(
-        `http://localhost:3001/api/files/${file.id}/download`,
+        `${API_URL}/files/${file.id}/download`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob',
@@ -202,7 +206,8 @@ export default function Home() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3001/api/files/${fileId}`, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      await axios.delete(`${API_URL}/files/${fileId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -222,7 +227,8 @@ export default function Home() {
     setLoadingAudit(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3001/api/audit/file/${file.id}`, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const response = await axios.get(`${API_URL}/audit/file/${file.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAuditLogs(response.data.logs);

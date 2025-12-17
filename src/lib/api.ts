@@ -70,8 +70,16 @@ export const fileAPI = {
 };
 
 export const shareAPI = {
-  shareWithUsers: async (fileId: string, userIds: string[]) => {
-    const response = await api.post('/share/users', { fileId, userIds });
+  getAllUsers: async () => {
+    const response = await api.get('/auth/users');
+    return response.data;
+  },
+  getSharedFiles: async () => {
+    const response = await api.get('/share/shared-with-me');
+    return response.data;
+  },
+  shareWithUsers: async (fileId: string, userIds: string[], expiresAt?: string) => {
+    const response = await api.post('/share/users', { fileId, userIds, expiresAt });
     return response.data;
   },
   generateShareLink: async (fileId: string, expiresAt?: string) => {
@@ -80,6 +88,12 @@ export const shareAPI = {
   },
   accessFileViaLink: async (token: string) => {
     const response = await api.get(`/share/link/${token}`);
+    return response.data;
+  },
+  downloadFileViaLink: async (token: string) => {
+    const response = await api.get(`/share/link/${token}/download`, {
+      responseType: 'blob',
+    });
     return response.data;
   },
   getFilePermissions: async (fileId: string) => {

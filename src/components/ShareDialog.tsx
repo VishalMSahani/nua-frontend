@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
+import { shareAPI } from '@/lib/api';
 
 interface User {
   _id: string;
@@ -36,29 +36,20 @@ export default function ShareDialog({ file, onClose }: ShareDialogProps) {
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error('Not authenticated');
-        setLoadingUsers(false);
-        return;
-      }
+      const response = await shareAPI.getAllUsers();
       
-      const response = await axios.get('http://localhost:3001/api/auth/users', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (response.data && response.data.users) {
-        setUsers(response.data.users);
+      if (response && response.users) {
+        setUsers(response.users);
       } else {
         setUsers([]);
       }
     } catch (error: any) {
       if (error.response?.status === 404) {
-        toast.error('Users endpoint not found. Please ensure backend is running.');
+        toast.error('Users endpoint not found.');
       } else if (error.response?.status === 401) {
         toast.error('Authentication failed. Please login again.');
       } else {
-        toast.error('Failed to load users. Check if backend is running on port 3001.');
+        toast.error('Failed to load users.');
       }
       setUsers([]);
     } finally {
@@ -74,35 +65,13 @@ export default function ShareDialog({ file, onClose }: ShareDialogProps) {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const expiresAtISO = expiryDate ? new Date(expiryDate).toISOString() : undefined;
       
-      const shareUsersPayload: any = {
-        fileId: file.id,
-        userIds: selectedUsers
-      };
-      
-      if (expiryDate) {
-        shareUsersPayload.expiresAt = new Date(expiryDate).toISOString();
-      }
-      
-      await axios.post(
-        'http://localhost:3001/api/share/users',
-        shareUsersPayload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await shareAPI.shareWithUsers(file.id, selectedUsers, expiresAtISO);
 
-      const payload: any = { fileId: file.id };
-      if (expiryDate) {
-        payload.expiresAt = new Date(expiryDate).toISOString();
-      }
-
-      const linkResponse = await axios.post(
-        'http://localhost:3001/api/share/link',
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const linkResponse = await shareAPI.generateShareLink(file.id, expiresAtISO);
       
-      setShareLink(linkResponse.data.shareLink.url);
+      setShareLink(linkResponse.shareLink.url);
       toast.success('File shared successfully with selected users!');
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to share file');

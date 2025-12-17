@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { shareAPI, fileAPI } from '@/lib/api';
 
 interface FileInfo {
   id: string;
@@ -44,13 +44,9 @@ export default function ShareLinkPage() {
     setError('');
     
     try {
-      const authToken = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:3001/api/share/link/${token}`,
-        { headers: { Authorization: `Bearer ${authToken}` } }
-      );
+      const response = await shareAPI.accessFileViaLink(token);
 
-      setFileInfo(response.data.file);
+      setFileInfo(response.file);
       toast.success('File access granted!');
     } catch (err: any) {
       console.error('Error accessing shared file:', err);
@@ -66,16 +62,8 @@ export default function ShareLinkPage() {
     if (!fileInfo) return;
 
     try {
-      const authToken = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:3001/api/files/${fileInfo.id}/download`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-          responseType: 'blob',
-        }
-      );
+      const blob = await fileAPI.downloadFile(fileInfo.id);
 
-      const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -95,21 +83,14 @@ export default function ShareLinkPage() {
     if (!fileInfo) return;
 
     try {
-      const authToken = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:3001/api/files/${fileInfo.id}/download`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-          responseType: 'blob',
-        }
-      );
+      const blobData = await fileAPI.downloadFile(fileInfo.id);
 
       let mimeType = fileInfo.type;
       if (fileInfo.filename.toLowerCase().endsWith('.svg') && !mimeType.includes('svg')) {
         mimeType = 'image/svg+xml';
       }
 
-      const blob = new Blob([response.data], { type: mimeType });
+      const blob = new Blob([blobData], { type: mimeType });
       const url = window.URL.createObjectURL(blob);
       window.open(url, '_blank');
     } catch (error) {

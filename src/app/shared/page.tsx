@@ -91,7 +91,7 @@ export default function SharedPage() {
 
   const handleAudit = async (file: FileItem) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/audit/file/${file.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/audit/file/${file.id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
